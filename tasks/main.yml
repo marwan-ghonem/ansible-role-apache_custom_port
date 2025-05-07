@@ -1,0 +1,41 @@
+---
+- name: Install Apache (httpd)
+  dnf:
+    name: httpd
+    state: present
+
+- name: Backup httpd.conf
+  copy:
+    src: /etc/httpd/conf/httpd.conf
+    dest: /etc/httpd/conf/httpd.conf.bak
+    remote_src: yes
+
+- name: Change Apache listen port to 88
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen '
+    line: 'Listen 88'
+
+- name: Allow Apache to use port 88 in SELinux
+  command: semanage port -a -t http_port_t -p tcp 88
+  register: selinux_result
+  failed_when: selinux_result.rc != 0 and 'already defined' not in selinux_result.stderr
+  ignore_errors: yes
+
+- name: Ensure firewalld allows port 88
+  firewalld:
+    port: 88/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+
+- name: Enable and start Apache
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+
+- name: Upload custom index.html
+  copy:
+    src: index.html
+    dest: /var/www/html/index.html
