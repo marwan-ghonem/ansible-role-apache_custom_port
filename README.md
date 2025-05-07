@@ -13,3 +13,13 @@ Marwan Ghonem
   roles:
     - apache_custom_port
 ```
+apache_custom_port/
+├── defaults/
+│   └── main.yml        # Default variables
+├── files/
+│   └── index.html      # Web page to deploy
+├── meta/
+│   └── main.yml        # Role metadata
+├── tasks/
+│   └── main.yml        # Main task list
+└── README.md           # Role documentation
